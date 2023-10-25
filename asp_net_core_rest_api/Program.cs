@@ -1,6 +1,8 @@
 ﻿using asp_net_core_rest_api;
 using asp_net_core_rest_api.Data;
 using asp_net_core_rest_api.Logging;
+using asp_net_core_rest_api.Repository;
+using asp_net_core_rest_api.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -20,6 +22,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
     option.UseSqlServer(connectionString);
 });
+
+builder.Services.AddScoped<IVillaRepository, VillaRepository>();
 
 //mapper for model-dto mapping
 builder.Services.AddAutoMapper(typeof(MappingConfig));
