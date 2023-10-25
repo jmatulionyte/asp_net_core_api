@@ -1,24 +1,38 @@
-﻿using asp_net_core_rest_api.Logging;
+﻿using asp_net_core_rest_api;
+using asp_net_core_rest_api.Data;
+using asp_net_core_rest_api.Logging;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 //Log.Logger = new LoggerConfiguration().MinimumLevel.Debug()
 //    .WriteTo.File("log/villaLogs.txt", rollingInterval: RollingInterval.Infinite).CreateLogger();
 
 //builder.Host.UseSerilog();
 
+//add database connection
+var connectionString = builder.Configuration.GetConnectionString("DefaultSQLConnection");
+
+//providing connection to ApplicationDbContextClass
+builder.Services.AddDbContext<ApplicationDbContext>(option =>
+{
+    option.UseSqlServer(connectionString);
+});
+
+//mapper for model-dto mapping
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+
 builder.Services.AddControllers(option =>
 {
     //option.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger/OpenAP I at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //custom logger service
-builder.Services.AddSingleton<ILogging, LoggingV2>();
+//builder.Services.AddSingleton<ILogging, LoggingV2>();
 
 var app = builder.Build();
 
