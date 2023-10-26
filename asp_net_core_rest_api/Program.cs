@@ -23,7 +23,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
     option.UseSqlServer(connectionString);
 });
 
+//registrig as dependency injection/service?
 builder.Services.AddScoped<IVillaRepository, VillaRepository>();
+builder.Services.AddScoped<IVillaNumberRepository, VillaNumberRepository>();
 
 //mapper for model-dto mapping
 builder.Services.AddAutoMapper(typeof(MappingConfig));

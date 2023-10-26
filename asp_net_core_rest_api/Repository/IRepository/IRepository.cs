@@ -12,7 +12,7 @@ namespace asp_net_core_rest_api.Repository.IRepository
         Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null);
 
         //no tracking from EF
-        Task<T> GetAsync(Expression<Func<T, bool>>? filter = null, bool tracked = true);
+        Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true);
 
         Task CreateAsync(T entity);
 

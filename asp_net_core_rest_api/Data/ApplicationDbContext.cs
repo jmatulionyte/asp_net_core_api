@@ -11,6 +11,7 @@ namespace asp_net_core_rest_api.Data
 		}
 
         public DbSet<Villa> Villas { get; set; }
+        public DbSet<VillaNumber> VillaNumbers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
