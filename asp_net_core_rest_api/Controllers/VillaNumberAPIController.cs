@@ -19,14 +19,16 @@ namespace asp_net_core_rest_api.Controllers
     {   //can be accessed in same class or stuct or derived class
         protected APIResponse _response;
         private readonly IVillaNumberRepository _dbVillaNumber;
+        private readonly IVillaRepository _dbVilla;
         private readonly IMapper _mapper;
 
 
         //dependency injection
-        public VillaNumberAPIController(IVillaNumberRepository dbVillaNumber, IMapper mapper)
+        public VillaNumberAPIController(IVillaNumberRepository dbVillaNumber, IMapper mapper, IVillaRepository dbVilla)
         {
             _dbVillaNumber = dbVillaNumber;
             _mapper = mapper;
+            _dbVilla = dbVilla;
             this._response = new();
         }
 
@@ -51,19 +53,19 @@ namespace asp_net_core_rest_api.Controllers
             return _response;
         }
 
-        [HttpGet("{villaNo:int}", Name = "GetVillaNumber")]
+        [HttpGet("{id:int}", Name = "GetVillaNumber")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<APIResponse>> GetVillaNumber(int villaNo)
+        public async Task<ActionResult<APIResponse>> GetVillaNumber(int id)
         {
             try
             {
-                if (villaNo == 0)
+                if (id == 0)
                 {
                     return BadRequest();
                 }
-                var villaNumber = await _dbVillaNumber.GetAsync(u => u.VillaNo == villaNo);
+                var villaNumber = await _dbVillaNumber.GetAsync(u => u.VillaNo == id);
                 if (villaNumber == null)
                 {
                     return NotFound();
@@ -95,6 +97,13 @@ namespace asp_net_core_rest_api.Controllers
                     ModelState.AddModelError("CustomeError", "Villa number already exist");
                     return BadRequest(ModelState);
                 }
+                //provided villa is need to be existant in Villa Table, so need to check that
+                //checks if there ar soecific IDs in table, returns vool, compares it woth null
+                if(await _dbVilla.GetAsync(u => u.Id == numberCraeteDTO.VillaID) == null) {
+                    ModelState.AddModelError("CustomeError", "Villa Id is invalid");
+                    return BadRequest(ModelState);
+                }
+
                 if (numberCraeteDTO == null)
                 {
                     return BadRequest(numberCraeteDTO);
@@ -120,20 +129,20 @@ namespace asp_net_core_rest_api.Controllers
             return _response;
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpDelete("{villaNumber:int}", Name = "DeleteVillaNumber")]
-        public async Task<ActionResult<APIResponse>> DeleteVillaNumber(int villaNumber)
+        [HttpDelete("{id:int}", Name = "DeleteVillaNumber")]
+        public async Task<ActionResult<APIResponse>> DeleteVillaNumber(int id)
         {
             try
             {
-                if (villaNumber == 0)
+                if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadGateway;
                     return BadRequest(_response);
                 }
-                var villa = await _dbVillaNumber.GetAsync(u => u.VillaNo == villaNumber);
+                var villa = await _dbVillaNumber.GetAsync(u => u.VillaNo == id);
 
                 if (villa == null)
                 {
@@ -155,17 +164,22 @@ namespace asp_net_core_rest_api.Controllers
             return _response;
         }
 
-        [HttpPut("{villaNo:int}", Name = "UpdateVillaNumber")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [HttpPut("{id:int}", Name = "UpdateVillaNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<APIResponse>> UpdateVillaNumber(int villaNo, [FromBody] VillaNumberUpdateDTO numberUpdateDTO)
+        public async Task<ActionResult<APIResponse>> UpdateVillaNumber(int id, [FromBody] VillaNumberUpdateDTO numberUpdateDTO)
         {
             try
             {
-                if (numberUpdateDTO == null || villaNo != numberUpdateDTO.VillaNo)
+                if (numberUpdateDTO == null || id != numberUpdateDTO.VillaNo)
                 {
                     _response.StatusCode = HttpStatusCode.BadGateway;
                     return BadRequest(_response);
+                }
+
+                if(await _dbVilla.GetAsync(u => u.Id == numberUpdateDTO.VillaID) == null) {
+                    ModelState.AddModelError("CustomeError", "Villa Id is invalid");
+                    return BadRequest(ModelState);
                 }
 
                 VillaNumber model = _mapper.Map<VillaNumber>(numberUpdateDTO);

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using asp_net_core_rest_api.Data;
 
@@ -11,9 +12,11 @@ using asp_net_core_rest_api.Data;
 namespace asp_net_core_rest_api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231026191950_tableNaming")]
+    partial class tableNaming
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,15 +34,18 @@ namespace asp_net_core_rest_api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Amenity")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -67,7 +73,7 @@ namespace asp_net_core_rest_api.Migrations
                         {
                             Id = 8,
                             Amenity = "",
-                            CreatedDate = new DateTime(2023, 10, 27, 13, 1, 9, 380, DateTimeKind.Local).AddTicks(4660),
+                            CreatedDate = new DateTime(2023, 10, 26, 22, 19, 50, 884, DateTimeKind.Local).AddTicks(6740),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa3.jpg",
                             Name = "Royal Villa",
@@ -80,7 +86,7 @@ namespace asp_net_core_rest_api.Migrations
                         {
                             Id = 9,
                             Amenity = "",
-                            CreatedDate = new DateTime(2023, 10, 27, 13, 1, 9, 380, DateTimeKind.Local).AddTicks(4710),
+                            CreatedDate = new DateTime(2023, 10, 26, 22, 19, 50, 884, DateTimeKind.Local).AddTicks(6780),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa1.jpg",
                             Name = "Premium Pool Villa",
@@ -93,7 +99,7 @@ namespace asp_net_core_rest_api.Migrations
                         {
                             Id = 10,
                             Amenity = "",
-                            CreatedDate = new DateTime(2023, 10, 27, 13, 1, 9, 380, DateTimeKind.Local).AddTicks(4710),
+                            CreatedDate = new DateTime(2023, 10, 26, 22, 19, 50, 884, DateTimeKind.Local).AddTicks(6780),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa4.jpg",
                             Name = "Luxury Pool Villa",
@@ -106,7 +112,7 @@ namespace asp_net_core_rest_api.Migrations
                         {
                             Id = 11,
                             Amenity = "",
-                            CreatedDate = new DateTime(2023, 10, 27, 13, 1, 9, 380, DateTimeKind.Local).AddTicks(4720),
+                            CreatedDate = new DateTime(2023, 10, 26, 22, 19, 50, 884, DateTimeKind.Local).AddTicks(6790),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa5.jpg",
                             Name = "Diamond Villa",
@@ -119,7 +125,7 @@ namespace asp_net_core_rest_api.Migrations
                         {
                             Id = 12,
                             Amenity = "",
-                            CreatedDate = new DateTime(2023, 10, 27, 13, 1, 9, 380, DateTimeKind.Local).AddTicks(4720),
+                            CreatedDate = new DateTime(2023, 10, 26, 22, 19, 50, 884, DateTimeKind.Local).AddTicks(6790),
                             Details = "Fusce 11 tincidunt maximus leo, sed scelerisque massa auctor sit amet. Donec ex mauris, hendrerit quis nibh ac, efficitur fringilla enim.",
                             ImageUrl = "https://dotnetmastery.com/bluevillaimages/villa2.jpg",
                             Name = "Diamond Pool Villa",
@@ -139,30 +145,15 @@ namespace asp_net_core_rest_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SpecialDetails")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("VillaID")
-                        .HasColumnType("int");
-
                     b.HasKey("VillaNo");
 
-                    b.HasIndex("VillaID");
-
                     b.ToTable("VillaNumbers");
-                });
-
-            modelBuilder.Entity("asp_net_core_rest_api.Models.VillaNumber", b =>
-                {
-                    b.HasOne("asp_net_core_rest_api.Models.Villa", "Villa")
-                        .WithMany()
-                        .HasForeignKey("VillaID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Villa");
                 });
 #pragma warning restore 612, 618
         }

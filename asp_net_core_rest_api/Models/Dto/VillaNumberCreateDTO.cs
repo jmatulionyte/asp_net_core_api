@@ -7,6 +7,11 @@ namespace asp_net_core_rest_api.Models.Dto
 	{
         [Required]
         public int VillaNo { get; set; }
+
+        [Required]
+
+        public int VillaID { get; set; }
+
         public string SpecialDetails { get; set; }
     }
 }
