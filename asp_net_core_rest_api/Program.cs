@@ -26,6 +26,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 //registrig as dependency injection/service?
 builder.Services.AddScoped<IVillaRepository, VillaRepository>();
 builder.Services.AddScoped<IVillaNumberRepository, VillaNumberRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 //mapper for model-dto mapping
 builder.Services.AddAutoMapper(typeof(MappingConfig));
