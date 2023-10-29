@@ -39,7 +39,7 @@ namespace asp_net_core_rest_api.Controllers
         {
             try
             {
-                IEnumerable<VillaNumber> villaNumberList = await _dbVillaNumber.GetAllAsync();
+                IEnumerable<VillaNumber> villaNumberList = await _dbVillaNumber.GetAllAsync(includeProperties:"Villa");
                 _response.Result = _mapper.Map<List<VillaNumberDTO>>(villaNumberList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
@@ -94,13 +94,13 @@ namespace asp_net_core_rest_api.Controllers
             {
                 if (await _dbVillaNumber.GetAsync(u => u.VillaNo == numberCraeteDTO.VillaNo) != null)
                 {
-                    ModelState.AddModelError("CustomeError", "Villa number already exist");
+                    ModelState.AddModelError("ErrorMessages", "Villa number already exist");
                     return BadRequest(ModelState);
                 }
                 //provided villa is need to be existant in Villa Table, so need to check that
                 //checks if there ar soecific IDs in table, returns vool, compares it woth null
                 if(await _dbVilla.GetAsync(u => u.Id == numberCraeteDTO.VillaID) == null) {
-                    ModelState.AddModelError("CustomeError", "Villa Id is invalid");
+                    ModelState.AddModelError("ErrorMessages", "Villa Id is invalid");
                     return BadRequest(ModelState);
                 }
 
@@ -178,7 +178,7 @@ namespace asp_net_core_rest_api.Controllers
                 }
 
                 if(await _dbVilla.GetAsync(u => u.Id == numberUpdateDTO.VillaID) == null) {
-                    ModelState.AddModelError("CustomeError", "Villa Id is invalid");
+                    ModelState.AddModelError("ErrorMessages", "Villa Id is invalid");
                     return BadRequest(ModelState);
                 }
 

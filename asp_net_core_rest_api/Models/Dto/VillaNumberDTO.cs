@@ -12,6 +12,8 @@ namespace asp_net_core_rest_api.Models.Dto
         public int VillaID { get; set; }
 
         public string SpecialDetails { get; set; }
+
+        public VillaDTO Villa { get; set; }
     }
 }
 

@@ -112,7 +112,7 @@ namespace asp_net_core_rest_api.Controllers
                 //tries to fetch recors with posted data, if not found,posted data is unique
                 if (await _dbVilla.GetAsync(u => u.Name.ToLower() == craeteDTO.Name.ToLower()) != null)
                 {
-                    ModelState.AddModelError("CustomeError", "Villa already exist");
+                    ModelState.AddModelError("ErrorMessages", "Villa already exist");
                     return BadRequest(ModelState);
                 }
                 if (craeteDTO == null)
