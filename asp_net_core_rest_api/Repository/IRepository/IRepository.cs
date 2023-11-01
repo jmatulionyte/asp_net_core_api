@@ -9,7 +9,8 @@ namespace asp_net_core_rest_api.Repository.IRepository
         //get specific T class by linq expression as param
         //linq expression(func) on the class 'T'
         //func need to be provided output result - bool (e.g. u=> u.Id = id - return bool)
-        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
+        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null,
+            int pageSize = 0, int pageNumber = 1);
 
         //no tracking from EF
         Task<T> GetAsync(Expression<Func<T, bool>> filter = null, bool tracked = true, string? includeProperties = null);

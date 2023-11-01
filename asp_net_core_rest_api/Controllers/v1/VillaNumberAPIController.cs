@@ -10,13 +10,12 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace asp_net_core_rest_api.Controllers
+namespace asp_net_core_rest_api.Controllers.v1
 {
 
     [Route("api/v{version:apiVersion}/VillaNumberAPI")]
     [ApiController]
-    [ApiVersion("1.0")]
-    [ApiVersion("2.0")]
+    [ApiVersion("1.0", Deprecated = true)]
 
     public class VillaNumberAPIController : ControllerBase
     {   //can be accessed in same class or stuct or derived class
@@ -37,7 +36,6 @@ namespace asp_net_core_rest_api.Controllers
 
 
         [HttpGet]
-        [MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetVillaNumbers()
         {
@@ -57,9 +55,11 @@ namespace asp_net_core_rest_api.Controllers
             return _response;
         }
 
-
-        [HttpGet]
-        [MapToApiVersion("2.0")]
+        //swagger differentitiases only by http verb and parameters,
+        //so methods Get and getVillaNumbers would be the same for him
+        //err would be thrown
+        //[HttpGet("GetString")] - provided additional route to differentiate endpoints
+        [HttpGet("GetString")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<string> Get()
         {

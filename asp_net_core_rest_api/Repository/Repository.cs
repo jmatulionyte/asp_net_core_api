@@ -39,6 +39,7 @@ namespace asp_net_core_rest_api.Repository
             {
                 query = query.Where(filter);
             }
+            
             if (includeProperties != null)
             {
                 foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -50,12 +51,21 @@ namespace asp_net_core_rest_api.Repository
             return await query.FirstOrDefaultAsync();
         }
         //in theory 'includeProperties' could be "villa, villaSpecial. etc"
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, int pageSize = 0, int pageNumber = 1)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
             {
-                //query = query.Where(filter);
+                query = query.Where(filter);
+            }
+            if (pageSize > 0)
+            {
+                if (pageSize > 100)
+                {
+                    pageSize = 100;
+                }
+                //skiping pages/recors for pagination
+                query = query.Skip(pageSize * (pageNumber - 1)).Take(pageSize);
             }
             //include additional data to DTM
             if (includeProperties != null)

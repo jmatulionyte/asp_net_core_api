@@ -11,7 +11,10 @@ namespace asp_net_core_rest_api.Controllers
 
     [Route("api/v{version:apiVersion}/UsersAuth")]
     [ApiController]
-    [ApiVersion("1.0")]
+    [ApiVersionNeutral]
+    // assumes that controller will never change -
+    // will need the auhtorization for other endpoints
+    // suth endpoints will be in every version in swagger
     public class UsersController : Controller
     {
         private readonly IUserRepository _userRepo;
@@ -26,7 +29,7 @@ namespace asp_net_core_rest_api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
-            var loginResponse = await _userRepo.Login(model);
+            var loginResponse = await _userRepo.Login(model); //fixme - add this handling of status code, when it is not 200-299 - issuccess is false
             //no user with name and password
             if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token)) {
                 _response.StatusCode = HttpStatusCode.BadRequest;

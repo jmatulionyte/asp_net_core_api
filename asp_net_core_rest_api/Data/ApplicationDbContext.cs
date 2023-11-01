@@ -1,20 +1,24 @@
 ﻿using System;
 using asp_net_core_rest_api.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace asp_net_core_rest_api.Data
 {
-	public class ApplicationDbContext : DbContext
+    //IdentityDbContext instead of DB context , for isentity service. uses applicationuser class for handling users
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
 		}
 
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; } //overrides identity service table, adds field /name/, etc
         public DbSet<Villa> Villas { get; set; }
         public DbSet<VillaNumber> VillaNumbers { get; set; }
         public DbSet<LocalUser> LocalUsers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); //override craeting keys in custom identity table?
             modelBuilder.Entity<Villa>().HasData(
                 new Villa
                 {

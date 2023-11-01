@@ -5,6 +5,8 @@ using System.Text;
 using asp_net_core_rest_api.Data;
 using asp_net_core_rest_api.Models;
 using asp_net_core_rest_api.Models.Dto;
+using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,17 +15,25 @@ namespace asp_net_core_rest_api.Repository.IRepository
 	public class UserRepository : IUserRepository
 	{
         private readonly ApplicationDbContext _db;
+        private readonly UserManager<ApplicationUser> _userManager; //identity service helper tool
+        private readonly RoleManager<IdentityRole> _roleManager; //identity service helper tool
+
         private string secretKey;
+        private readonly IMapper _mapper;
         //dependency injection
-        public UserRepository(ApplicationDbContext db, IConfiguration configuration)
+        public UserRepository(ApplicationDbContext db, IConfiguration configuration,
+            UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
         {
+            _userManager = userManager;
             _db = db;
+            _roleManager = roleManager;
+            _mapper = mapper;
             secretKey = configuration.GetValue<string>("ApiSettings:Secret");
         }
 
         public bool isUserUnique(string username)
         {
-            var user = _db.LocalUsers.FirstOrDefault(x => x.UserName == username);
+            var user = _db.ApplicationUsers.FirstOrDefault(x => x.UserName == username);
             if (user == null) //no user with that username
             {
                 return true;
@@ -34,11 +44,15 @@ namespace asp_net_core_rest_api.Repository.IRepository
         public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
             //check if there are user with sam eusername and pw
-            var user = _db.LocalUsers.FirstOrDefault(x => x.UserName.ToLower() == loginRequestDTO.UserName.ToLower() &&
-                x.Password == loginRequestDTO.Password);
+            var user = _db.ApplicationUsers.FirstOrDefault(x => x.UserName.ToLower() == loginRequestDTO.UserName.ToLower());
 
-            //user is not existant
-            if (user == null)
+            //use usernamager to check pw validity
+            bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
+
+
+
+            //user is not existant or pw does not fit username
+            if (user == null || isValid == false)
             {
                 return new LoginResponseDTO()
                 {
@@ -52,14 +66,18 @@ namespace asp_net_core_rest_api.Repository.IRepository
             var tokenHandler = new JwtSecurityTokenHandler();
             //convert secretKey string to byte array
             var key = Encoding.ASCII.GetBytes(secretKey);
+
+            //get roles from roles table for user
+            var roles = await _userManager.GetRolesAsync(user);
+
             //token descriptor, tell what are the claims in the token
             //claim identify users name, role, etc, custom claims, default cliam for user Id, role, etc,
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.Name, user.UserName.ToString()),
+                    new Claim(ClaimTypes.Role, roles.FirstOrDefault()) //would need foreach if many roles
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 //generates signning credential for token descriptor - how to encrypt
@@ -71,24 +89,45 @@ namespace asp_net_core_rest_api.Repository.IRepository
             {
                 //writetoken allogs to get token value 
                 Token = tokenHandler.WriteToken(token),
-                User = user
+                User = _mapper.Map<UserDTO>(user),
+                //Role = roles.FirstOrDefault()
             };
             return loginResponseDTO;
         }
 
-        public async Task<LocalUser> Register(RegistrationRequestDTO registerationRequestDTO)
+        public async Task<UserDTO> Register(RegistrationRequestDTO registrationRequestDTO)
         {
-            LocalUser user = new LocalUser()
+            ApplicationUser user = new()
             {
-                UserName = registerationRequestDTO.UserName,
-                Password = registerationRequestDTO.Password,
-                Name = registerationRequestDTO.Name,
-                Role = registerationRequestDTO.Role
+                UserName = registrationRequestDTO.UserName,
+                Email = registrationRequestDTO.UserName,
+                NormalizedEmail= registrationRequestDTO.UserName.ToUpper(),
+                Name = registrationRequestDTO.Name,
             };
-            _db.LocalUsers.Add(user);
-            await _db.SaveChangesAsync();
-            user.Password = "";
-            return user;
+
+            try
+            {
+                var result = await _userManager.CreateAsync(user, registrationRequestDTO.Password);
+                if(result.Succeeded) //if creation successded, only then assign authorization
+                {
+                    if (!_roleManager.RoleExistsAsync("admin").GetAwaiter().GetResult()){ //custom situation, when no admin role is provided
+                        await _roleManager.CreateAsync(new IdentityRole("admin"));
+                        await _roleManager.CreateAsync(new IdentityRole("customer"));
+                    }
+                    await _userManager.AddToRoleAsync(user, "admin");
+                    var userToReturn = _db.ApplicationUsers.FirstOrDefault(u => u.UserName == registrationRequestDTO.UserName);
+                    return _mapper.Map<UserDTO>(userToReturn);
+                }
+                else
+                {
+
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
+            return new UserDTO();
         }
     }
 }

@@ -11,6 +11,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using asp_net_core_rest_api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
     option.UseSqlServer(connectionString);
 });
 
+//identity service uses db dependency injection for storing data
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 //registrig as dependency injection/service?
 builder.Services.AddScoped<IVillaRepository, VillaRepository>();
 builder.Services.AddScoped<IVillaNumberRepository, VillaNumberRepository>();
@@ -74,6 +78,12 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddControllers(option =>
 {
+    //caching profile for all apis
+    option.CacheProfiles.Add("Default30",
+        new CacheProfile()
+        {
+            Duration = 30
+        });
     //option.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 // Learn more about configuring Swagger/OpenAP I at https://aka.ms/aspnetcore/swashbuckle

@@ -20,7 +20,7 @@ namespace asp_net_core_rest_api
             CreateMap<VillaNumber, VillaNumberCreateDTO>().ReverseMap();
             CreateMap<VillaNumber, VillaNumberUpdateDTO>().ReverseMap();
 
-
+            CreateMap<ApplicationUser, UserDTO>().ReverseMap();
 
         }
     }

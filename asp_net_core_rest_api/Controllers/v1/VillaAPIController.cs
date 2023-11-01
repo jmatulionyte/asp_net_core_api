@@ -9,9 +9,9 @@ using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
-namespace asp_net_core_rest_api.Controllers
+namespace asp_net_core_rest_api.Controllers.v1
 {
 
     [Route("api/v{version:apiVersion}/VillaAPI")]
@@ -42,14 +42,33 @@ namespace asp_net_core_rest_api.Controllers
 
 
         [HttpGet]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetVillas()
+        //[ResponseCache(CacheProfileName = "Default30")] //for 30s data is not fetched from DB, caontroller action is not invoked
+        public async Task<ActionResult<APIResponse>> GetVillas([FromQuery(Name ="filterOccupancy")]int? occupancy,
+            [FromQuery] string? search, int pageSize = 0, int pageNumber = 1)
         {
             try
             {
+                IEnumerable<Villa> villaList;
                 //_logger.Log("Getting all villas", "");
-                IEnumerable<Villa> villaList = await _dbVilla.GetAllAsync();
+                //queries db with filers. executed in DB
+                if (occupancy > 0)
+                {
+                    villaList = await _dbVilla.GetAllAsync(u => u.Occupancy == occupancy, pageSize:pageSize, pageNumber:pageNumber);
+                }
+                else
+                {
+                    villaList = await _dbVilla.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber);
+                }
+                //filltering db data after quering it from DB (faster, better). executed on code
+                if(!string.IsNullOrEmpty(search))
+                {
+                    villaList = villaList.Where(u => u.Name.ToLower().Contains(search));
+                }
+                //add pagination to headers for clarity?
+                Pagination pagination = new() { PageNumber = pageSize, PageSize = pageSize };
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+
                 //maps from Villa to VillaDTO
                 _response.Result = _mapper.Map<List<VillaDTO>>(villaList);
                 _response.StatusCode = HttpStatusCode.OK;
@@ -69,6 +88,12 @@ namespace asp_net_core_rest_api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         //[ProducesResponseType(200, Type=typeof(VillaDTO))]
+
+        //would cache specifci villa object fro 30 sec,
+        //can cache more than 1 specific villa object at the same time
+        //[ResponseCache(Duration = 30)]
+        //no caching at all
+        //[ResponseCache(Location =ResponseCacheLocation.None, NoStore =true)]
         public async Task<ActionResult<APIResponse>> GetVilla(int id)
         {
             try
