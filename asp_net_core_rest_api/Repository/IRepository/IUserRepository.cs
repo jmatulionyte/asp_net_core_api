@@ -10,7 +10,7 @@ namespace asp_net_core_rest_api.Repository.IRepository
 	{ //checkif users id unique or not
 		bool isUserUnique(string username);
 		Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
-		Task<LocalUser> Registration(RegistrationRequestDTO registerationRequestDTO);
+		Task<LocalUser> Register(RegistrationRequestDTO registerationRequestDTO);
     }
 }
 

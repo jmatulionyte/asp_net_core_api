@@ -76,7 +76,7 @@ namespace asp_net_core_rest_api.Repository.IRepository
             return loginResponseDTO;
         }
 
-        public async Task<LocalUser> Registration(RegistrationRequestDTO registerationRequestDTO)
+        public async Task<LocalUser> Register(RegistrationRequestDTO registerationRequestDTO)
         {
             LocalUser user = new LocalUser()
             {

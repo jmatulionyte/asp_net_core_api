@@ -13,8 +13,11 @@ using Microsoft.EntityFrameworkCore;
 namespace asp_net_core_rest_api.Controllers
 {
 
-    [Route("api/VillaNumberAPI")]
+    [Route("api/v{version:apiVersion}/VillaNumberAPI")]
     [ApiController]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+
     public class VillaNumberAPIController : ControllerBase
     {   //can be accessed in same class or stuct or derived class
         protected APIResponse _response;
@@ -34,6 +37,7 @@ namespace asp_net_core_rest_api.Controllers
 
 
         [HttpGet]
+        [MapToApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetVillaNumbers()
         {
@@ -51,6 +55,15 @@ namespace asp_net_core_rest_api.Controllers
                      = new List<string>() { ex.ToString() };
             }
             return _response;
+        }
+
+
+        [HttpGet]
+        [MapToApiVersion("2.0")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
         }
 
         [HttpGet("{id:int}", Name = "GetVillaNumber")]

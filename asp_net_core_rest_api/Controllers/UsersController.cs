@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace asp_net_core_rest_api.Controllers
 {
-    [Route("api/UsersAuth")]
-    [ApiController]
 
+    [Route("api/v{version:apiVersion}/UsersAuth")]
+    [ApiController]
+    [ApiVersion("1.0")]
     public class UsersController : Controller
     {
         private readonly IUserRepository _userRepo;
@@ -33,13 +34,33 @@ namespace asp_net_core_rest_api.Controllers
                 _response.ErrorMessages.Add("Username or password incorrect");
                 return BadRequest(_response);
             }
-            return View();
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.IsSuccess = true;
+            _response.Result = loginResponse;
+            return Ok(_response);
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
         {
-            return View();
+            bool ifUserNameUnique = _userRepo.isUserUnique(model.UserName);
+            if (!ifUserNameUnique)
+            {
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
+                _response.ErrorMessages.Add("Username already exist");
+                return BadRequest(_response);
+            }
+
+            var user = await _userRepo.Register(model);
+            if(user == null)
+            {
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
+                _response.ErrorMessages.Add("Error while registering");
+                return BadRequest(_response);
+            }
+            return Ok(_response);
         }
     }
 }

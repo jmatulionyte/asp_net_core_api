@@ -5,6 +5,10 @@ namespace asp_net_core_rest_api.Models
 {
 	public class APIResponse
 	{
+		public APIResponse()
+		{
+			ErrorMessages = new List<string>();
+		}
 		public HttpStatusCode StatusCode { get; set; }
 
 		public bool IsSuccess { get; set; } = true;
